@@ -54,8 +54,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return new InMemoryUserDetailsManager(User.builder()
                 .username("admin")
                 .password(passwordEncoder().encode("admin"))
-                .roles("ADMIN")
-                .build());
+                .roles(Role.ADMIN.name())
+                .build(),
+                User.builder()
+                        .username("user")
+                        .password(passwordEncoder().encode("user"))
+                        .roles(Role.USER.name())
+                        .build());
     }
 
     // Этот бин кодирует пароль, сила - 12, чем больше - тем сложнее пароль. Аналогичен
