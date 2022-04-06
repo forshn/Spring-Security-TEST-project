@@ -2,7 +2,7 @@ package ru.forsh.springsecuiritytest.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -16,6 +16,7 @@ import ru.forsh.springsecuiritytest.model.Role;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true) // Аннотация включает аннотации PreAuthorized В контроллерах.
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     //Для разграничения ролей Админ/Юзер - создаём кастомную конфигурация HTTP
@@ -32,18 +33,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/") // здесь мы указываем что на страницу приложения / - доступ имеют все
                 .permitAll()
-                .antMatchers(HttpMethod.GET, "/api/**")
-                .hasAnyRole(Role.USER.name(), Role.ADMIN.name()) // здесь мы указываем, что доступ к ГЕТ запросам имеют все
-                .antMatchers(HttpMethod.POST, "/api/**") // к пост - только админы
-                .hasRole(Role.ADMIN.name())
-                .antMatchers(HttpMethod.DELETE, "/api/**") // к Delete - только админы
-                .hasRole(Role.ADMIN.name())
                 .anyRequest()
                 .authenticated() // Каждый запрос должен проходить аутентификацию
                 .and()
                 .httpBasic(); // Кодировка с помощью BASE64
-
-
     }
 
 
@@ -51,15 +44,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     @Override
     protected UserDetailsService userDetailsService() {
-        return new InMemoryUserDetailsManager(User.builder()
-                .username("admin")
-                .password(passwordEncoder().encode("admin"))
-                .roles(Role.ADMIN.name())
-                .build(),
+        return new InMemoryUserDetailsManager(
+                User.builder()
+                        .username("admin")
+                        .password(passwordEncoder().encode("admin"))
+                        .authorities(Role.ADMIN.getAuthorities())
+                        .build(),
                 User.builder()
                         .username("user")
                         .password(passwordEncoder().encode("user"))
-                        .roles(Role.USER.name())
+                        .authorities(Role.USER.getAuthorities())
                         .build());
     }
 
