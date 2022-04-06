@@ -1,10 +1,7 @@
 package ru.forsh.springsecuiritytest.rest;
 
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.forsh.springsecuiritytest.model.Developer;
 
 import java.util.List;
@@ -31,5 +28,16 @@ public class DeveloperRestControllerV1 {
                 .filter(dev -> dev.getId() == id)
                 .findFirst()
                 .orElse(null);
+    }
+
+    @PostMapping
+    public Developer create(@RequestBody Developer developer) {
+        developers.add(developer);
+        return developer;
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable long id) {
+        developers.removeIf(d -> d.getId().equals(id));
     }
 }
