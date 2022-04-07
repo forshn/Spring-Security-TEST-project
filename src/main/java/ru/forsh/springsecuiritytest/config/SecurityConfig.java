@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import ru.forsh.springsecuiritytest.model.Role;
 
 
@@ -36,7 +37,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest()
                 .authenticated() // Каждый запрос должен проходить аутентификацию
                 .and()
-                .httpBasic(); // Кодировка с помощью BASE64
+                .formLogin()// Здесь мы прописываем что будет собственная форма логина, html форма в templates
+                .loginPage("/auth/login").permitAll()
+                .defaultSuccessUrl("/auth/success")
+                .and()
+                .logout()// Настраиваем LOGOUT
+                .logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout", "POST"))// Обработка метода логаут - методом POST. это важно, т.к. по умолчанию стоит GET, чего не должно быть
+                .invalidateHttpSession(true)// инвалидация текущей сессии
+                .clearAuthentication(true)// очищение сущности, которая содержит информацию про тебя
+                .deleteCookies("JSESSIONID") // очистка куки
+                .logoutSuccessUrl("/auth/login"); // форма логина с её адресом. доступ разрешён всем.
     }
 
 
